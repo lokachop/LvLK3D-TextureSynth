@@ -6,6 +6,7 @@ end
 
 loadFileThing("components.wirebutton")
 loadFileThing("components.texelement")
+loadFileThing("components.rgbentry")
 
 loadFileThing("elements")
 loadFileThing("compute")

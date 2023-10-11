@@ -8,7 +8,7 @@ end
 function TextureSynth.InitConfigPanel(parent)
 	local w, h = love.graphics.getDimensions()
 
-	local fractPanel = .6
+	local fractPanel = .5
 	local invFract = 1 - fractPanel
 
 	local panel_config = LvLKUI.NewElement("panel_config", "panel")
@@ -33,20 +33,11 @@ function TextureSynth.InitConfigPanel(parent)
 		end
 	end
 
-	local function addStringParam(elmTarget, index, numIndex, elm, fancyName)
-		local yCalc = numIndex * (18 + 24)
-		local label_idx = LvLKUI.NewElement("label_idx_" .. numIndex, "label")
-		label_idx:SetPriority(10)
-		label_idx:SetPos({196 * .5, yCalc})
-		label_idx:SetLabel(fancyName)
-		label_idx:SetAlignMode({1, 0})
-		LvLKUI.PushElement(label_idx, elm)
-
-
+	local function addStringParam(elmTarget, index, yOffset, elm, fancyName)
 		local elmParams = elmTarget:GetParameters()
 
-		local entry_param = LvLKUI.NewElement("entry_idx_" .. numIndex, "textentry")
-		entry_param:SetPos({16, yCalc + 16})
+		local entry_param = LvLKUI.NewElement("entry_idx_" .. index, "textentry")
+		entry_param:SetPos({16, yOffset})
 		entry_param:SetSize({196 - 32, 24})
 		entry_param:SetLabel(fancyName)
 		entry_param:SetText(elmParams[index])
@@ -56,20 +47,11 @@ function TextureSynth.InitConfigPanel(parent)
 		LvLKUI.PushElement(entry_param, elm)
 	end
 
-	local function addNumParam(elmTarget, index, numIndex, elm, fancyName)
-		local yCalc = numIndex * (18 + 24)
-		local label_idx = LvLKUI.NewElement("label_idx_" .. numIndex, "label")
-		label_idx:SetPriority(10)
-		label_idx:SetPos({196 * .5, yCalc})
-		label_idx:SetLabel(fancyName)
-		label_idx:SetAlignMode({1, 0})
-		LvLKUI.PushElement(label_idx, elm)
-
-
+	local function addNumParam(elmTarget, index, yOffset, elm, fancyName)
 		local elmParams = elmTarget:GetParameters()
 
-		local entry_param = LvLKUI.NewElement("entry_idx_" .. numIndex, "textentry")
-		entry_param:SetPos({16, yCalc + 16})
+		local entry_param = LvLKUI.NewElement("entry_idx_" .. index, "textentry")
+		entry_param:SetPos({16, yOffset})
 		entry_param:SetSize({196 - 32, 24})
 		entry_param:SetLabel(fancyName)
 		entry_param:SetNumericalOnly(true)
@@ -81,17 +63,59 @@ function TextureSynth.InitConfigPanel(parent)
 		LvLKUI.PushElement(entry_param, elm)
 	end
 
+	local function addColourParam(elmTarget, index, yOffset, elm, fancyName)
+		local elmParams = elmTarget:GetParameters()
+
+		local entry_param_rgb = LvLKUI.NewElement("entry_idx_" .. index, "rgbentry")
+		entry_param_rgb:SetPos({16, yOffset})
+		entry_param_rgb:SetSize({196 - 32, 24})
+		entry_param_rgb:SetOnChange(function(_, new, idx)
+			elmParams[index][idx] = new[idx]
+		end)
+		LvLKUI.PushElement(entry_param_rgb, elm)
+		entry_param_rgb:SetRGB(elmParams[index][1], elmParams[index][2], elmParams[index][3])
+	end
+
+
+	local function addTableParam(elmTarget, index, yOffset, elm, fancyName)
+		local _, _, paramTypes = elmTarget:GetParameters()
+
+		local paramType = paramTypes[index]
+		-- check the param type...
+
+		if paramType == "colour" then
+			addColourParam(elmTarget, index, yOffset, elm, fancyName)
+		end
+	end
+
+	local function addLabel(elmTarget, index, yOffset, elm, fancyName)
+		local label_idx = LvLKUI.NewElement("label_idx_" .. index, "label")
+		label_idx:SetPriority(10)
+		label_idx:SetPos({196 * .5, yOffset})
+		label_idx:SetLabel(fancyName)
+		label_idx:SetAlignMode({1, 0})
+		LvLKUI.PushElement(label_idx, elm)
+	end
+
 	function panel_config.SetupToElement(elm, elmTarget)
+		local yOff = 32
 		local paramIndex = 1
 
 		local elmParams, paramLookups = elmTarget:GetParameters()
 		for k, v in ipairs(elmParams) do
 			local fancyName = paramLookups[k]
+			addLabel(elmTarget, k, yOff, elm, fancyName)
+			yOff = yOff + 24
 
 			if type(v) == "number" then
-				addNumParam(elmTarget, k, paramIndex, elm, fancyName)
+				addNumParam(elmTarget, k, yOff, elm, fancyName)
+				yOff = yOff + 42
 			elseif type(v) == "string" then
-				addStringParam(elmTarget, k, paramIndex, elm, fancyName)
+				addStringParam(elmTarget, k, yOff, elm, fancyName)
+				yOff = yOff + 42
+			elseif type(v) == "table" then
+				addTableParam(elmTarget, k, yOff, elm, fancyName)
+				yOff = yOff + 42
 			end
 
 			paramIndex = paramIndex + 1

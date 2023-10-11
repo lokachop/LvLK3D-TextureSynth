@@ -46,6 +46,7 @@ LvLKUI.DeclareComponent("texelement", {
 
 	["_inCount"] = 0,
 	["_outCount"] = 0,
+	["_isTexElement"] = true, -- hacks and hacks and hacks
 
 	["SetElementType"] = function(elm, etype)
 		elm._elementType = etype or "none"
@@ -62,7 +63,8 @@ LvLKUI.DeclareComponent("texelement", {
 	end,
 
 	["GetParameters"] = function(elm)
-		return elm._elementParameteri.params, elm._elementParameteri.paramLookups
+		local parameteri = elm._elementParameteri
+		return parameteri.params, parameteri.paramLookups, parameteri.paramTypes
 	end,
 
 	-- this is called last, its like a late init
@@ -269,6 +271,10 @@ LvLKUI.DeclareComponent("texelement", {
 	end,
 
 	-- what to do when we're removed?
-	["onRemove"] = function()
+	["onRemove"] = function(elm)
+		if elm._isExp then
+			print("removal of global is output")
+			TextureSynth.HasExporter = false
+		end
 	end,
 })

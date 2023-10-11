@@ -6,6 +6,7 @@ uniform vec2 texASize;
 uniform vec3 sunDir;
 uniform float specMul;
 uniform float specConst;
+uniform float dotMul;
 
 
 
